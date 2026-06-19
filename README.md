@@ -78,3 +78,4 @@ EMSI ClubHub is a comprehensive Django-based web application designed to manage 
 *   `media/`: Directory where uploaded files like club logos are stored.
 *   `static/`: Directory for static assets (CSS, JS, images).
 *   `templates/`: HTML templates for the frontend.
+Built with ❤️ by CHABLI Hajar, AL JAOUHARI Ikhlass, EL OUAHABI Oumaima, BTIRA Nizar, LAMRANI HNINI Mohamed
