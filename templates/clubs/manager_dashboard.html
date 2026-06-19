@@ -1,0 +1,113 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Mon Club 🏛️</h1>
+  <p>Bienvenue, <strong>{{ user.first_name }}</strong> — Responsable de club.</p>
+</div>
+
+<div class="stats-grid" style="margin-bottom:28px;">
+  <div class="stat-card">
+    <div class="stat-icon green">🏛️</div>
+    <div class="stat-info"><strong>{% if managed_club %}1{% else %}0{% endif %}</strong><span>Club géré</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue">👥</div>
+    <div class="stat-info"><strong>{{ managed_club.memberships.count|default:"0" }}</strong><span>Membres</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow">⏳</div>
+    <div class="stat-info"><strong class="stat-num">{{ pending_join_requests|length }}</strong><span>Demandes en attente</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">📅</div>
+    <div class="stat-info"><strong>{{ managed_events|length }}</strong><span>Événements</span></div>
+  </div>
+</div>
+
+{% if managed_club %}
+<!-- Club Info -->
+<div class="two-col" style="align-items:start; margin-bottom:28px;">
+  <div>
+    <div class="section-header">
+      <h2>🏛️ {{ managed_club.name }}</h2>
+      <div class="flex gap-8">
+        <a href="{% url 'create_event_request' %}" class="btn btn-primary btn-sm">+ Événement</a>
+        <a href="{% url 'delete_managed_club' %}" class="btn btn-danger btn-sm"
+           onclick="return confirm('Supprimer ce club ?')">Supprimer</a>
+      </div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <p class="mb-16"><span class="text-muted text-sm">Catégorie</span><br>
+         <span class="badge badge-green">{{ managed_club.category }}</span></p>
+      <p><span class="text-muted text-sm">Description</span><br>
+         <strong>{{ managed_club.description }}</strong></p>
+    </div>
+  </div>
+
+  <!-- Pending join requests -->
+  <div>
+    <div class="section-header">
+      <h2>👥 Demandes d'adhésion</h2>
+      {% if pending_join_requests %}<span class="badge badge-yellow">{{ pending_join_requests|length }}</span>{% endif %}
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Étudiant</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for req in pending_join_requests %}
+          <tr>
+            <td><strong>{{ req.user.first_name }} {{ req.user.last_name }}</strong>
+                <br><span class="text-sm text-muted">{{ req.user.filiere|default:"—" }}</span></td>
+            <td class="flex gap-8">
+              <a href="{% url 'approve_join_request' req.id %}" class="btn btn-primary btn-sm">✓</a>
+              <a href="{% url 'reject_join_request' req.id %}" class="btn btn-danger btn-sm">✗</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2"><div class="empty-state"><p>Aucune demande.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Events -->
+<div class="section-header">
+  <h2>📅 Événements de mon club</h2>
+  <a href="{% url 'create_event_request' %}" class="btn btn-outline btn-sm">+ Créer</a>
+</div>
+<div class="events-list">
+  {% for event in managed_events %}
+  <div class="event-card">
+    <div class="event-date-box">
+      <div class="day">{{ event.event_date|date:"d" }}</div>
+      <div class="month">{{ event.event_date|date:"M" }}</div>
+    </div>
+    <div class="event-info">
+      <h3>{{ event.title }}</h3>
+      <p>{{ event.description }}</p>
+      <div class="flex gap-16 wrap mt-8" style="font-size: 0.9rem; color: var(--text-muted);">
+        {% if event.location %}
+          <span>📍 {{ event.location }}</span>
+        {% endif %}
+        {% if event.event_time %}
+          <span>🕒 {{ event.event_time|time:"H:i" }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state"><div class="icon">📅</div><p>Aucun événement validé.</p></div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state card" style="padding:48px;">
+  <div class="icon">🏛️</div>
+  <p>Vous ne gérez pas encore de club.</p>
+</div>
+{% endif %}
+
+{% endblock %}

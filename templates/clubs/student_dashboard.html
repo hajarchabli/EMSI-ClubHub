@@ -1,0 +1,85 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Mes Clubs 🎒</h1>
+  <p>Bienvenue, <strong>{{ user.first_name }}</strong> — Voici votre espace étudiant.</p>
+</div>
+
+<!-- Stats rapides -->
+<div class="stats-grid" style="grid-template-columns: repeat(3,1fr); max-width:600px; margin-bottom:28px;">
+  <div class="stat-card">
+    <div class="stat-icon green">🏛️</div>
+    <div class="stat-info"><strong>{{ memberships|length }}</strong><span>Clubs rejoints</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon blue">📅</div>
+    <div class="stat-info"><strong>—</strong><span>Événements</span></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow">💡</div>
+    <div class="stat-info"><strong>3</strong><span>Max clubs</span></div>
+  </div>
+</div>
+
+<div class="two-col" style="gap:24px; align-items:start;">
+
+  <!-- Mes clubs inscrits -->
+  <div>
+    <div class="section-header">
+      <h2>🎒 Mes clubs</h2>
+      <a href="{% url 'club_list' %}" class="btn btn-outline btn-sm">Découvrir</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Club</th><th>Depuis</th><th></th></tr></thead>
+        <tbody>
+          {% for m in memberships %}
+          <tr>
+            <td><strong>{{ m.club.name }}</strong>
+                <br><span class="text-sm text-muted">{{ m.club.category }}</span></td>
+            <td>{{ m.joined_at|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'leave_club' m.club.id %}"
+                 class="btn btn-danger btn-sm"
+                 onclick="return confirm('Quitter {{ m.club.name }} ?')">Quitter</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">
+            <div class="empty-state">
+              <div class="icon">🏛️</div>
+              <p>Vous n'avez rejoint aucun club.<br>
+              <a href="{% url 'club_list' %}" class="text-green font-bold">Découvrir les clubs →</a></p>
+            </div>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-16">
+      <a href="{% url 'create_club_request' %}" class="btn btn-primary">
+        💡 Proposer un nouveau club
+      </a>
+    </div>
+  </div>
+
+  <!-- Profil rapide -->
+  <div>
+    <div class="section-header"><h2>👤 Mon Profil</h2></div>
+    <div class="card" style="padding:24px;">
+      <p class="mb-16"><span class="text-muted text-sm">Nom complet</span><br>
+         <strong>{{ user.first_name }} {{ user.last_name }}</strong></p>
+      <p class="mb-16"><span class="text-muted text-sm">Email</span><br>
+         <strong>{{ user.email }}</strong></p>
+      <p class="mb-16"><span class="text-muted text-sm">Filière</span><br>
+         <strong>{{ user.filiere|default:"Non renseignée" }}</strong></p>
+      <p class="mb-16"><span class="text-muted text-sm">Rôle</span><br>
+         <span class="badge badge-grey">Étudiant</span></p>
+      <a href="{% url 'profile' %}" class="btn btn-outline btn-sm">Modifier mon profil</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

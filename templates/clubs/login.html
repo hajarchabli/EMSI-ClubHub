@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Clubs Étudiants — Connexion</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-box">
+    <!-- EMSI Logo + App Name -->
+    <div class="auth-brand">
+      <img src="{% static 'img/emsi_logo.png' %}" alt="EMSI" style="height:52px; width:auto;">
+      <div class="brand-name" style="margin-left:10px;">
+        <strong style="font-size:1.15rem; font-weight:800; line-height:1.2; color:var(--green-dark);">Hub Clubs<br>Étudiants</strong>
+      </div>
+    </div>
+
+    <h1 class="auth-title">Bon retour ! 👋</h1>
+    <p class="auth-subtitle">Connectez-vous à votre espace</p>
+
+    <div class="auth-tabs">
+      <a href="{% url 'login' %}" class="auth-tab active">Connexion</a>
+      <a href="{% url 'register' %}" class="auth-tab">Inscription</a>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert error mb-16">Email ou mot de passe incorrect.</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="username" id="id_username"
+               placeholder="votre@emsi.ma"
+               value="{{ form.username.value|default:'' }}" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" name="password" id="id_password"
+               placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full mt-8">Se connecter</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

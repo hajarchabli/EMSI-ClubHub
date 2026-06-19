@@ -1,0 +1,143 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>📊 Dashboard Admin</h1>
+  <p>Bienvenue, <strong>{{ user.first_name }} {{ user.last_name }}</strong></p>
+</div>
+
+<!-- Stats rapides cliquables -->
+<div class="stats-grid">
+  <a href="{% url 'club_list' %}" style="text-decoration:none;">
+    <div class="stat-card" style="cursor:pointer; transition: transform .2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div class="stat-icon green">🏛️</div>
+      <div class="stat-info">
+        <strong class="stat-num">{{ clubs_count }}</strong>
+        <span>Clubs actifs</span>
+      </div>
+    </div>
+  </a>
+  <a href="#students" style="text-decoration:none;">
+    <div class="stat-card" style="cursor:pointer;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div class="stat-icon blue">👥</div>
+      <div class="stat-info">
+        <strong class="stat-num">{{ students_count }}</strong>
+        <span>Utilisateurs</span>
+      </div>
+    </div>
+  </a>
+  <a href="#club-requests" style="text-decoration:none;">
+    <div class="stat-card" style="cursor:pointer;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div class="stat-icon yellow">⏳</div>
+      <div class="stat-info">
+        <strong class="stat-num">{{ pending_club_count }}</strong>
+        <span>Clubs en attente</span>
+      </div>
+    </div>
+  </a>
+  <a href="#event-requests" style="text-decoration:none;">
+    <div class="stat-card" style="cursor:pointer;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+      <div class="stat-icon red">📆</div>
+      <div class="stat-info">
+        <strong class="stat-num">{{ pending_event_count }}</strong>
+        <span>Événements en attente</span>
+      </div>
+    </div>
+  </a>
+</div>
+
+<!-- Demandes de clubs -->
+<div id="club-requests" class="mb-24">
+  <div class="section-header">
+    <h2>✅ Demandes de création de clubs</h2>
+    {% if pending_club_count > 0 %}<span class="badge badge-yellow">{{ pending_club_count }} en attente</span>{% endif %}
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nom du club</th><th>Demandeur</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for req in club_requests %}
+        <tr>
+          <td><strong>{{ req.club_name }}</strong></td>
+          <td>{{ req.student.first_name }} {{ req.student.last_name }}</td>
+          <td style="max-width:200px; color:var(--text-muted); font-size:.85rem;">{{ req.description|truncatewords:10 }}</td>
+          <td class="flex gap-8">
+            <a href="{% url 'approve_club_request' req.id %}" class="btn btn-primary btn-sm">✓ Accepter</a>
+            <a href="{% url 'reject_club_request' req.id %}" class="btn btn-danger btn-sm">✗ Rejeter</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4"><div class="empty-state"><p>Aucune demande en attente.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Demandes d'événements -->
+<div id="event-requests" class="mb-24">
+  <div class="section-header">
+    <h2>📆 Demandes d'événements</h2>
+    {% if pending_event_count > 0 %}<span class="badge badge-yellow">{{ pending_event_count }} en attente</span>{% endif %}
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Titre</th><th>Club</th><th>Date</th><th>Demandeur</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for req in event_requests %}
+        <tr>
+          <td>
+            <strong>{{ req.title }}</strong><br>
+            <span class="text-xs text-muted" style="font-size: 0.8rem;">📍 {{ req.location }} | 🕒 {{ req.event_time|time:"H:i"|default:"—" }}</span>
+          </td>
+          <td>{{ req.club.name }}</td>
+          <td>{{ req.event_date|date:"d M Y" }}</td>
+          <td>{{ req.requested_by.first_name }} {{ req.requested_by.last_name }}</td>
+          <td class="flex gap-8">
+            <a href="{% url 'approve_event_request' req.id %}" class="btn btn-primary btn-sm">✓ Accepter</a>
+            <a href="{% url 'reject_event_request' req.id %}" class="btn btn-danger btn-sm">✗ Rejeter</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><p>Aucune demande en attente.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Gestion utilisateurs -->
+<div id="students">
+  <div class="section-header">
+    <h2>👥 Utilisateurs</h2>
+    <a href="{% url 'create_student' %}" class="btn btn-primary btn-sm">+ Ajouter</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Filière</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td><strong>{{ s.first_name }} {{ s.last_name }}</strong></td>
+          <td class="text-muted text-sm">{{ s.email }}</td>
+          <td>
+            {% if s.role == 'administration' %}<span class="badge badge-blue">Administrateur</span>
+            {% elif s.role == 'club_manager' %}<span class="badge badge-green">Responsable</span>
+            {% else %}<span class="badge badge-grey">Étudiant</span>{% endif %}
+          </td>
+          <td class="text-sm text-muted">{{ s.filiere|default:"—" }}</td>
+          <td class="flex gap-8">
+            <a href="{% url 'update_student' s.id %}" class="btn btn-outline btn-sm">Modifier</a>
+            <a href="{% url 'delete_student' s.id %}" class="btn btn-danger btn-sm"
+               onclick="return confirm('Supprimer {{ s.first_name }} {{ s.last_name }} ?')">Supprimer</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><p>Aucun utilisateur.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

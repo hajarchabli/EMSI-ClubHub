@@ -1,0 +1,49 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="profile-hero">
+  <div class="profile-hero-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+  <div class="profile-hero-info">
+    <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+    <p>{% if user.role == 'student' %}Étudiant{% elif user.role == 'club_manager' %}Responsable de club{% else %}Administrateur{% endif %}
+       {% if user.filiere %} · {{ user.filiere }}{% endif %}</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <h2 class="form-title">Modifier mon profil</h2>
+  <p class="form-subtitle">Mettez à jour vos informations personnelles.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom</label>
+        <input type="text" name="first_name" value="{{ form.first_name.value|default:user.first_name }}" required>
+      </div>
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" name="last_name" value="{{ form.last_name.value|default:user.last_name }}" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email <span style="color:var(--red)">*</span></label>
+      <input type="email" name="email" value="{{ form.email.value|default:user.email }}" required>
+      <span class="help">Doit se terminer par @emsi.ma</span>
+      {% if form.email.errors %}<span class="form-error">{{ form.email.errors|join:", " }}</span>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label>Filière</label>
+      <input type="text" name="filiere" value="{{ form.filiere.value|default:user.filiere }}" placeholder="Informatique, Finance...">
+    </div>
+
+    <div class="flex gap-8 mt-24">
+      <button type="submit" class="btn btn-primary">Sauvegarder</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost">Annuler</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+<section class="card narrow">
+    <h2 style="color: var(--emsi-green-dark); margin-top: 0;">Modifier l'étudiant: {{ student.first_name }} {{ student.last_name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <span style="color: var(--danger); font-size: 0.85rem;">{{ field.errors|join:", " }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div style="margin-top: 16px;">
+            <button type="submit" style="width: 100%;">Enregistrer</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

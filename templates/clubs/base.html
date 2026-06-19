@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hub Clubs Étudiants</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=11">
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'img/emsi_logo.png' %}" alt="EMSI" style="height:48px; width:auto; object-fit:contain;">
+      <div class="brand-name" style="margin-left:10px;">
+        <strong style="font-size:1.05rem; font-weight:800; line-height:1.2; color:var(--green-dark);">Hub Clubs<br>Étudiants</strong>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+      <div class="user-info">
+        <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+        <span>{% if user.role == 'administration' %}Administrateur{% elif user.role == 'club_manager' %}Responsable{% else %}Étudiant{% endif %}</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      {% if user.role == 'administration' %}
+        <div class="nav-section-title">Menu</div>
+        <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="{% url 'club_list' %}" class="nav-link {% if request.resolver_match.url_name == 'club_list' %}active{% endif %}">
+          <span class="nav-icon">🏛️</span> Clubs
+        </a>
+        <a href="{% url 'admin_events' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_events' %}active{% endif %}">
+          <span class="nav-icon">📅</span> Événements
+        </a>
+
+      {% elif user.role == 'club_manager' %}
+        <div class="nav-section-title">Menu</div>
+        <a href="{% url 'manager_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'manager_dashboard' %}active{% endif %}">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="{% url 'club_list' %}" class="nav-link {% if request.resolver_match.url_name == 'club_list' %}active{% endif %}">
+          <span class="nav-icon">🏛️</span> Clubs
+        </a>
+        <a href="{% url 'club_events' %}" class="nav-link {% if request.resolver_match.url_name == 'club_events' %}active{% endif %}">
+          <span class="nav-icon">📅</span> Événements
+        </a>
+        <a href="{% url 'managed_club_members' %}" class="nav-link {% if request.resolver_match.url_name == 'managed_club_members' %}active{% endif %}">
+          <span class="nav-icon">👥</span> Mes membres
+        </a>
+        <a href="{% url 'create_event_request' %}" class="nav-link {% if request.resolver_match.url_name == 'create_event_request' %}active{% endif %}">
+          <span class="nav-icon">➕</span> Proposer événement
+        </a>
+
+      {% else %}
+        <div class="nav-section-title">Menu</div>
+        <a href="{% url 'club_list' %}" class="nav-link {% if request.resolver_match.url_name == 'club_list' %}active{% endif %}">
+          <span class="nav-icon">🏛️</span> Clubs
+        </a>
+        <a href="{% url 'club_events' %}" class="nav-link {% if request.resolver_match.url_name == 'club_events' %}active{% endif %}">
+          <span class="nav-icon">📅</span> Événements
+        </a>
+        <a href="{% url 'student_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">
+          <span class="nav-icon">🎒</span> Mes clubs
+        </a>
+        <a href="{% url 'create_club_request' %}" class="nav-link {% if request.resolver_match.url_name == 'create_club_request' %}active{% endif %}">
+          <span class="nav-icon">💡</span> Proposer un club
+        </a>
+        <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+          <span class="nav-icon">👤</span> Mon Profil
+        </a>
+      {% endif %}
+
+    </nav>
+    {% endif %}
+
+    <div class="sidebar-footer">
+      {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="nav-link logout">
+          <span class="nav-icon">🚪</span> Déconnexion
+        </a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main-wrap">
+    <header class="topbar">
+      <form action="{% url 'club_list' %}" method="GET" class="topbar-search">
+        <span class="icon">🔍</span>
+        <input type="text" name="q" placeholder="Rechercher un club..." value="{{ request.GET.q|default:'' }}">
+      </form>
+      <div class="topbar-right">
+        <button class="notif-btn" title="Notifications">🔔<span class="notif-dot"></span></button>
+      </div>
+    </header>
+
+    <div class="content fade-in">
+      {% if messages %}
+        <div class="messages">
+          {% for m in messages %}
+            <div class="alert {{ m.tags }}">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // Animate stat numbers
+  document.querySelectorAll('.stat-num').forEach(function(el){
+    const target = parseInt(el.textContent) || 0;
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 25));
+    const timer = setInterval(function(){
+      current = Math.min(current + step, target);
+      el.textContent = current;
+      if(current >= target) clearInterval(timer);
+    }, 40);
+  });
+
+  // Auto-dismiss alerts after 4s
+  setTimeout(function(){
+    document.querySelectorAll('.alert').forEach(function(a){
+      a.style.transition = 'opacity .5s';
+      a.style.opacity = '0';
+      setTimeout(function(){ a.remove(); }, 500);
+    });
+  }, 4000);
+});
+</script>
+</body>
+</html>

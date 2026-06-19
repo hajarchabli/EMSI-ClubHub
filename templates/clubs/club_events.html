@@ -1,0 +1,66 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>📅 Événements</h1>
+  <p>Tous les événements des clubs EMSI</p>
+</div>
+
+{% if user.role == 'club_manager' %}
+<div class="mb-24">
+  <a href="{% url 'create_event_request' %}" class="btn btn-primary">+ Proposer un événement</a>
+</div>
+{% endif %}
+
+<div class="events-list">
+  {% for event in events %}
+  <div class="event-card">
+    <div class="event-date-box">
+      <div class="day">{{ event.event_date|date:"d" }}</div>
+      <div class="month">{{ event.event_date|date:"M" }}</div>
+    </div>
+    <div class="event-info">
+      <h3>{{ event.title }}</h3>
+      <p>{{ event.description }}</p>
+      <div class="flex gap-16 wrap mt-8" style="font-size: 0.9rem; color: var(--text-muted);">
+        <span>🏛️ {{ event.club.name }}</span>
+        {% if event.location %}
+          <span>📍 {{ event.location }}</span>
+        {% endif %}
+        {% if event.event_time %}
+          <span>🕒 {{ event.event_time|time:"H:i" }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Inscription / Désinscription — uniquement pour étudiants et responsables -->
+    {% if user.role != 'administration' %}
+      <div class="flex gap-8" style="flex-shrink:0;">
+        {% if event.id in registered_event_ids %}
+          <form method="POST" action="{% url 'unregister_event' event.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Se désinscrire</button>
+          </form>
+        {% else %}
+          <form method="POST" action="{% url 'register_event' event.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">S'inscrire</button>
+          </form>
+        {% endif %}
+      </div>
+    {% else %}
+      <form method="POST" action="{% url 'delete_event' event.id %}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');" style="flex-shrink:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+      </form>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="empty-state card" style="padding:48px;">
+    <div class="icon">📅</div>
+    <p>Aucun événement disponible pour le moment.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

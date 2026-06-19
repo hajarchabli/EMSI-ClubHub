@@ -1,0 +1,38 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+<section class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="color: var(--emsi-green-dark); margin-top: 0; margin-bottom: 0;">Membres du club {% if club %}<span style="color: var(--emsi-green);">{{ club.name }}</span>{% endif %}</h2>
+        <a class="btn secondary" href="{% url 'manager_dashboard' %}">Retour au tableau de bord</a>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom Complet</th>
+                    <th>Email</th>
+                    <th>Date d'adhésion</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membership in memberships %}
+                <tr>
+                    <td><strong>{{ membership.user.first_name }} {{ membership.user.last_name }}</strong></td>
+                    <td>{{ membership.user.email }}</td>
+                    <td>{{ membership.joined_at|date:"d M Y" }}</td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'remove_member' membership.id %}" class="btn danger" style="padding: 6px 12px; font-size: 0.85rem;" onclick="return confirm('Voulez-vous vraiment supprimer ce membre ?');">Supprimer</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted);">Aucun membre.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>🏛️ Clubs Étudiants</h1>
+  <p>Découvrez et rejoignez les clubs de l'EMSI</p>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <a href="{% url 'club_list' %}" class="filter-btn {% if not category and not query %}active{% endif %}">Tous</a>
+  <a href="{% url 'club_list' %}?category=Musique" class="filter-btn {% if category == 'Musique' %}active{% endif %}">🎵 Musique</a>
+  <a href="{% url 'club_list' %}?category=Tech+%26+Innovation" class="filter-btn {% if category == 'Tech & Innovation' %}active{% endif %}">💻 Tech</a>
+  <a href="{% url 'club_list' %}?category=Sports" class="filter-btn {% if category == 'Sports' %}active{% endif %}">⚽ Sports</a>
+  <a href="{% url 'club_list' %}?category=Arts" class="filter-btn {% if category == 'Arts' %}active{% endif %}">🎨 Arts</a>
+  <a href="{% url 'club_list' %}?category=Autre" class="filter-btn {% if category == 'Autre' %}active{% endif %}">🚀 Autre</a>
+
+  {% if user.role == 'student' or user.role == 'club_manager' %}
+  <a href="{% url 'create_club_request' %}" class="filter-btn btn-primary" style="background:var(--green-main);color:white;border-color:var(--green-main);">+ Proposer un club</a>
+  {% endif %}
+</div>
+
+{% if query %}
+<p class="mb-16 text-muted">Résultats pour : <strong>"{{ query }}"</strong></p>
+{% endif %}
+
+<!-- Clubs Grid -->
+<div class="clubs-grid">
+  {% for club in clubs %}
+  <div class="club-card">
+    <div class="club-thumb club-thumb-{{ club.category|lower|cut:' '|cut:'&' }}">
+      {% if club.logo %}
+        <img src="{{ club.logo.url }}" alt="{{ club.name }}">
+      {% else %}
+        <div class="emoji-bg">
+          {% if club.category == 'Musique' %}🎵
+          {% elif club.category == 'Tech & Innovation' %}💻
+          {% elif club.category == 'Sports' %}⚽
+          {% elif club.category == 'Arts' %}🎨
+          {% else %}🚀{% endif %}
+        </div>
+      {% endif %}
+      <span class="club-category-tag">{{ club.category }}</span>
+    </div>
+
+    <div class="club-body">
+      <h3>{{ club.name }}</h3>
+      <p>{{ club.description|truncatewords:18 }}</p>
+      <div class="club-meta">
+        <span>👤 {{ club.manager.first_name }} {{ club.manager.last_name }}</span>
+        <span>👥 {{ club.memberships.count }} membres</span>
+      </div>
+      <div class="club-actions">
+        <a href="{% url 'club_detail' club.id %}" class="btn btn-outline btn-sm">Voir détails</a>
+        {% if user.role == 'student' %}
+          <form method="POST" action="{% url 'request_join_club' %}" style="flex:1">
+            {% csrf_token %}
+            <input type="hidden" name="club" value="{{ club.id }}">
+            <button type="submit" class="btn btn-primary btn-sm btn-full">Rejoindre</button>
+          </form>
+        {% elif user.role == 'club_manager' %}
+          <form method="POST" action="{% url 'request_join_club' %}" style="flex:1">
+            {% csrf_token %}
+            <input type="hidden" name="club" value="{{ club.id }}">
+            <button type="submit" class="btn btn-outline btn-sm btn-full">Rejoindre</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state" style="grid-column:1/-1">
+    <div class="icon">🔍</div>
+    <p>Aucun club trouvé{% if query %} pour "{{ query }}"{% endif %}.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

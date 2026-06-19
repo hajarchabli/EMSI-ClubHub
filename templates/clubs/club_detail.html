@@ -1,0 +1,80 @@
+{% extends "clubs/base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1>🏛️ {{ club.name }}</h1>
+  <p>Détails du club</p>
+</div>
+
+<div class="two-col" style="align-items:start; margin-bottom:28px;">
+  <!-- Club info -->
+  <div>
+    <div class="card" style="overflow:hidden; margin-bottom:20px;">
+      <div class="club-thumb club-thumb-{{ club.category|lower|cut:' '|cut:'&' }}" style="height:200px;">
+        {% if club.logo %}
+          <img src="{{ club.logo.url }}" alt="{{ club.name }}">
+        {% else %}
+          <div class="emoji-bg" style="font-size:6rem;">
+            {% if club.category == 'Musique' %}🎵
+            {% elif club.category == 'Tech & Innovation' %}💻
+            {% elif club.category == 'Sports' %}⚽
+            {% elif club.category == 'Arts' %}🎨
+            {% else %}🚀{% endif %}
+          </div>
+        {% endif %}
+      </div>
+      <div style="padding:24px;">
+        <span class="badge badge-green mb-16">{{ club.category }}</span>
+        <h2 style="margin:8px 0 12px;">{{ club.name }}</h2>
+        <p class="text-muted">{{ club.description }}</p>
+        <p class="mt-16"><strong>Responsable :</strong> {{ club.manager.first_name }} {{ club.manager.last_name }}</p>
+        <p class="mt-8"><strong>Membres actifs :</strong> {{ members|length }}</p>
+
+        <div class="flex gap-8 mt-24">
+          {% if user.role == 'student' %}
+          <form method="POST" action="{% url 'request_join_club' %}">
+            {% csrf_token %}
+            <input type="hidden" name="club" value="{{ club.id }}">
+            <button type="submit" class="btn btn-primary">Rejoindre ce club</button>
+          </form>
+          {% endif %}
+          <a href="{% url 'club_list' %}" class="btn btn-outline">← Retour</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Events of this club -->
+  <div>
+    <div class="section-header"><h2>📅 Événements</h2></div>
+    <div class="events-list">
+      {% for event in events %}
+      <div class="event-card">
+        <div class="event-date-box">
+          <div class="day">{{ event.event_date|date:"d" }}</div>
+          <div class="month">{{ event.event_date|date:"M" }}</div>
+        </div>
+        <div class="event-info">
+          <h3>{{ event.title }}</h3>
+          <p>{{ event.description }}</p>
+        </div>
+        {% if user.role == 'student' or user.role == 'club_manager' %}
+        <div>
+          <form method="POST" action="{% url 'register_event' event.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">S'inscrire</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="empty-state card" style="padding:32px;">
+        <div class="icon">📅</div>
+        <p>Aucun événement pour ce club.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
